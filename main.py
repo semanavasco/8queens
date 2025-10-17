@@ -144,7 +144,7 @@ def repopulate(population: list[Individual], size: int):
         population += [Individual() for _ in range(0, size - len(population))]
 
 
-def simple_algorithm(size: int = 10, hcount: int = 5, lcount: int = 5):
+def simple_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
     """
     Simple version of the algorithm.
 
@@ -155,8 +155,10 @@ def simple_algorithm(size: int = 10, hcount: int = 5, lcount: int = 5):
         - Selects `hcount` best and `lcount` worst individuals in `population`
         - Creates a new generation of individuals (swaps positions)
         - Mutates every individual in `population`
+        - Repopulates population to match the desired `size`
 
-    size (default=10): Size of the population.
+
+    size (default=20): Size of the population.
     hcount (default=5): Number of best elements to keep from population.
     lcount (default=5): Number of worst elements to keep from population.
     """
@@ -231,6 +233,3 @@ def all_solutions_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
         repopulate(population, size)
 
     print(solutions_found)
-
-
-all_solutions_algorithm()
