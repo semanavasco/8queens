@@ -53,15 +53,11 @@ class Individual:
         nb_conflits = 0
 
         for x1, y1 in enumerate(self.positions):
-            for x2, y2 in enumerate(self.positions):
-                if x1 == x2 and y1 == y2:
-                    continue
+            for x2 in range(x1 + 1, len(self.positions)):
+                y2 = self.positions[x2]
 
                 if self.has_conflict((x1, y1), (x2, y2)):
                     nb_conflits += 1
-
-        if nb_conflits > 0:
-            nb_conflits //= 2
 
         return nb_conflits
 
