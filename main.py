@@ -133,7 +133,18 @@ def mutate(ind: Individual):
     ind.n_conflicts = ind.fitness()
 
 
-def simple_algorithm(subjects: int = 10, hcount: int = 5, lcount: int = 5):
+def repopulate(population: list[Individual], size: int):
+    """
+    Repopulates a `population` to the desired `size`.
+
+    population: The population to repopulate.
+    size: The desired population size.
+    """
+    if len(population) < size:
+        population += [Individual() for _ in range(0, size - len(population))]
+
+
+def simple_algorithm(size: int = 10, hcount: int = 5, lcount: int = 5):
     """
     Simple version of the algorithm.
 
@@ -145,11 +156,11 @@ def simple_algorithm(subjects: int = 10, hcount: int = 5, lcount: int = 5):
         - Creates a new generation of individuals (swaps positions)
         - Mutates every individual in `population`
 
-    subjects (default=10): Size of the population.
+    size (default=10): Size of the population.
     hcount (default=5): Number of best elements to keep from population.
     lcount (default=5): Number of worst elements to keep from population.
     """
-    population = create_random_pop(subjects)
+    population = create_random_pop(size)
 
     attempt = 0
     while True:
@@ -171,8 +182,7 @@ def simple_algorithm(subjects: int = 10, hcount: int = 5, lcount: int = 5):
         for individu in population:
             mutate(individu)
 
-        if len(population) < subjects:
-            population += [Individual() for _ in range(0, subjects - len(population))]
+        repopulate(population, size)
 
 
 simple_algorithm(25, 5, 5)
