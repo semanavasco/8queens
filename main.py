@@ -27,7 +27,7 @@ class Individual:
 
     def has_conflict(self, p1: tuple[int, int], p2: tuple[int, int]) -> bool:
         """
-        Checks if 2 queens have conflicts.
+        Checks if 2 queens X and Y coordinates have any `conflicts`.
 
         p1: X and Y coordinates of queen 1 on the board.
         p2: X and Y coordinates of queen 2 on the board.
@@ -46,7 +46,7 @@ class Individual:
 
     def fitness(self) -> int:
         """
-        Calculates the number of conflicts the current configuration has.
+        Calculates the number of `conflicts` the current configuration has.
 
         returns: The number of conflicts the configuration has.
         """
@@ -64,7 +64,7 @@ class Individual:
 
 def create_random_pop(count: int) -> list[Individual]:
     """
-    Generates an initial population of "count" individuals.
+    Generates an initial population of `count` individuals.
 
     count: The amount of individuals to generate.
 
@@ -75,7 +75,7 @@ def create_random_pop(count: int) -> list[Individual]:
 
 def evaluate(population: list[Individual]):
     """
-    Sorts the population using the amount of conflicts of each individual.
+    Sorts the `population` using the amount of conflicts of each individual.
     Population is sorted on an ascending order.
 
     population: A list of individuals, the population to sort.
@@ -87,8 +87,8 @@ def selection(
     population: list[Individual], hcount: int, lcount: int
 ) -> list[Individual]:
     """
-    Selects the "hcount" best and "lcount" worst elements from the population and returns a new population containing them.
-    It supposes the population has been sorted on an ascending order with Individual.n_conflicts.
+    Selects the `hcount` best and `lcount` worst elements from the `population` and returns a new `population` containing them.
+    It supposes the population has been sorted on an ascending order with `Individual.n_conflicts`.
 
     population: The population to do the selection from.
     hcount: Number of "Best" elements to keep.
@@ -108,8 +108,8 @@ def selection(
 
 def new_generation(ind1: Individual, ind2: Individual) -> tuple[Individual, Individual]:
     """
-    Combines the first (BOARD_SIZE / 2) positions of ind1 configuration with the last (BOARD_SIZE / 2) positions of ind2 configuration
-    and the first (BOARD_SIZE / 2) positions of ind2 with the last (BOARD_SIZE / 2) positions of ind1.
+    Combines the first (`BOARD_SIZE / 2`) positions of `ind1` configuration with the last (`BOARD_SIZE / 2`) positions of `ind2` configuration
+    and the first (`BOARD_SIZE / 2`) positions of `ind2` with the last (`BOARD_SIZE / 2`) positions of `ind1.
 
     ind1: First individual.
     ind2: Second individual.
@@ -133,19 +133,23 @@ def mutate(ind: Individual):
     ind.n_conflicts = ind.fitness()
 
 
-def simple_algorithm():
+def simple_algorithm(subjects: int = 10, hcount: int = 5, lcount: int = 5):
     """
     Simple version of the algorithm.
 
-    1. Creates a random population of 10 individuals.
+    1. Creates a random population of `subjects` individuals.
     2. While no solution is found :
-        - Evaluates population (sort by conflicts)
+        - Evaluates population (sort by `conflicts`)
         - Exits if solution was found
-        - Selects best and worst individuals in population
+        - Selects `hcount` best and `lcount` worst individuals in `population`
         - Creates a new generation of individuals (swaps positions)
-        - Mutates every individual in population
+        - Mutates every individual in `population`
+
+    subjects (default=10): Size of the population.
+    hcount (default=5): Number of best elements to keep from population.
+    lcount (default=5): Number of worst elements to keep from population.
     """
-    population = create_random_pop(10)
+    population = create_random_pop(subjects)
 
     attempt = 0
     while True:
@@ -157,7 +161,7 @@ def simple_algorithm():
             print(population[0])
             break
 
-        population = selection(population, 5, 5)
+        population = selection(population, hcount, lcount)
 
         for i in range(1, len(population)):
             population[i], population[i - 1] = new_generation(
@@ -167,5 +171,8 @@ def simple_algorithm():
         for individu in population:
             mutate(individu)
 
+        if len(population) < subjects:
+            population += [Individual() for _ in range(0, subjects - len(population))]
 
-simple_algorithm()
+
+simple_algorithm(25, 5, 5)
