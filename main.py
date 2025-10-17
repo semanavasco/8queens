@@ -185,4 +185,52 @@ def simple_algorithm(size: int = 10, hcount: int = 5, lcount: int = 5):
         repopulate(population, size)
 
 
-simple_algorithm(25, 5, 5)
+def all_solutions_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
+    """
+    This version of the algorithm shows every solution for the 8 Queens problem.
+
+    1. Creates a random population of `size` individuals.
+    2. While `solutions_found` is less than 92 :
+        - Evaluates population (sort by `conflicts`)
+        - Adds all 0 conflict solutions to solutions_found set
+        - Selects `hcount` best and `lcount` worst individuals in `population`
+        - Creates a new generation of individuals (swaps positions)
+        - Mutates every individual in `population`
+        - Repopulates population to match the desired `size`
+
+    size (default=20): Size of the population.
+    hcount (default=5): Number of best elements to keep from population.
+    lcount (default=5): Number of worst elements to keep from population.
+    """
+    population = create_random_pop(size)
+
+    solutions_found: set[str] = set()
+
+    attempt = 0
+    while len(solutions_found) != 92:
+        attempt += 1
+        print(f"Attempt #{attempt}")
+        evaluate(population)
+
+        for ind in population:
+            if ind.n_conflicts == 0:
+                solutions_found.add(str(ind.positions))
+
+        print(f"Found {len(solutions_found)} solutions")
+
+        population = selection(population, hcount, lcount)
+
+        for i in range(1, len(population)):
+            population[i], population[i - 1] = new_generation(
+                population[i], population[i - 1]
+            )
+
+        for individu in population:
+            mutate(individu)
+
+        repopulate(population, size)
+
+    print(solutions_found)
+
+
+all_solutions_algorithm()
