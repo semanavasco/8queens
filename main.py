@@ -83,44 +83,31 @@ def evaluate(population: list[Individual]):
     population.sort(key=lambda individu: individu.n_conflicts)
 
 
-def selection(
-    population: list[Individual], hcount: int, lcount: int
-) -> list[Individual]:
+def selection(population: list[Individual], hcount: int, lcount: int):
     """
-    Selects the `hcount` best and `lcount` worst elements from the `population` and returns a new `population` containing them.
+    Selects the `hcount` best and `lcount` worst elements from the `population`.
     It supposes the population has been sorted on an ascending order with `Individual.n_conflicts`.
 
     population: The population to do the selection from.
     hcount: Number of "Best" elements to keep.
     lcount: Number of "Worst" elements to keep.
-
-    returns: A list of individuals, the new population.
     """
-    selected = population[:hcount] + population[-lcount:]
-    result = []
-
-    for ind in selected:
-        if ind not in result:
-            result.append(ind)
-
-    return result
+    del population[hcount : len(population) - lcount]
 
 
-def new_generation(ind1: Individual, ind2: Individual) -> tuple[Individual, Individual]:
+def crossover(ind1: Individual, ind2: Individual):
     """
     Combines the first (`BOARD_SIZE / 2`) positions of `ind1` configuration with the last (`BOARD_SIZE / 2`) positions of `ind2` configuration
     and the first (`BOARD_SIZE / 2`) positions of `ind2` with the last (`BOARD_SIZE / 2`) positions of `ind1.
 
     ind1: First individual.
     ind2: Second individual.
-
-    returns: Tuple of 2 crossed individuals.
     """
     half = BOARD_SIZE // 2
-    return (
-        Individual(ind1.positions[:half] + ind2.positions[-half:]),
-        Individual(ind2.positions[:half] + ind1.positions[-half:]),
-    )
+    ind1_slice = ind1.positions[:half]
+    ind2_slice = ind2.positions[-half:]
+    ind1.positions[:half] = ind2_slice
+    ind2.positions[-half:] = ind1_slice
 
 
 def mutate(ind: Individual):
@@ -130,7 +117,6 @@ def mutate(ind: Individual):
     ind: The individual to mutate.
     """
     ind.positions[random.randint(0, 7)] = random.randint(0, 7)
-    ind.n_conflicts = ind.fitness()
 
 
 def repopulate(population: list[Individual], size: int):
@@ -165,6 +151,7 @@ def simple_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
     population = create_random_pop(size)
 
     attempt = 0
+
     while True:
         attempt += 1
         print(f"Attempt #{attempt}")
@@ -174,12 +161,10 @@ def simple_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
             print(population[0])
             break
 
-        population = selection(population, hcount, lcount)
+        selection(population, hcount, lcount)
 
         for i in range(1, len(population)):
-            population[i], population[i - 1] = new_generation(
-                population[i], population[i - 1]
-            )
+            crossover(population[i], population[i - 1])
 
         for individu in population:
             mutate(individu)
@@ -209,6 +194,7 @@ def all_solutions_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
     solutions_found: set[str] = set()
 
     attempt = 0
+
     while len(solutions_found) != 92:
         attempt += 1
         print(f"Attempt #{attempt}")
@@ -218,18 +204,15 @@ def all_solutions_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
             if ind.n_conflicts == 0:
                 solutions_found.add(str(ind.positions))
 
-        print(f"Found {len(solutions_found)} solutions")
+        print(f"    Found {len(solutions_found)} solutions")
 
-        population = selection(population, hcount, lcount)
+        selection(population, hcount, lcount)
 
         for i in range(1, len(population)):
-            population[i], population[i - 1] = new_generation(
-                population[i], population[i - 1]
-            )
+            crossover(population[i], population[i - 1])
 
         for individu in population:
             mutate(individu)
+            individu.n_conflicts = individu.fitness()
 
         repopulate(population, size)
-
-    print(solutions_found)
