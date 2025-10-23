@@ -34,15 +34,12 @@ class Individual:
 
         returns: True if queens conflict, False otherwise.
         """
-        if (
+        return (
             p1[0] == p2[0]
             or p1[1] == p2[1]
             or max(p1[0], p2[0]) - min(p1[0], p2[0])
             == max(p1[1], p2[1]) - min(p1[1], p2[1])
-        ):
-            return True
-
-        return False
+        )
 
     def fitness(self) -> int:
         """
@@ -52,8 +49,10 @@ class Individual:
         """
         conflicts = 0
 
-        for x1, y1 in enumerate(self.positions):
-            for x2 in range(x1 + 1, len(self.positions)):
+        for x1 in range(BOARD_SIZE):
+            y1 = self.positions[x1]
+
+            for x2 in range(x1 + 1, BOARD_SIZE):
                 y2 = self.positions[x2]
 
                 if self.has_conflict((x1, y1), (x2, y2)):
