@@ -50,16 +50,16 @@ class Individual:
 
         returns: The number of conflicts the configuration has.
         """
-        nb_conflits = 0
+        conflicts = 0
 
         for x1, y1 in enumerate(self.positions):
             for x2 in range(x1 + 1, len(self.positions)):
                 y2 = self.positions[x2]
 
                 if self.has_conflict((x1, y1), (x2, y2)):
-                    nb_conflits += 1
+                    conflicts += 1
 
-        return nb_conflits
+        return conflicts
 
 
 def create_random_pop(count: int) -> list[Individual]:
@@ -108,6 +108,8 @@ def crossover(ind1: Individual, ind2: Individual):
     ind2_slice = ind2.positions[-half:]
     ind1.positions[:half] = ind2_slice
     ind2.positions[-half:] = ind1_slice
+    ind1.n_conflicts = ind1.fitness()
+    ind2.n_conflicts = ind2.fitness()
 
 
 def mutate(ind: Individual):
@@ -117,6 +119,7 @@ def mutate(ind: Individual):
     ind: The individual to mutate.
     """
     ind.positions[random.randint(0, 7)] = random.randint(0, 7)
+    ind.n_conflicts = ind.fitness()
 
 
 def repopulate(population: list[Individual], size: int):
@@ -162,13 +165,8 @@ def simple_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
             break
 
         selection(population, hcount, lcount)
-
-        for i in range(1, len(population)):
-            crossover(population[i], population[i - 1])
-
-        for individu in population:
-            mutate(individu)
-
+        crossover(population[random.randint(0, 7)], population[random.randint(0, 7)])
+        mutate(population[random.randint(0, 7)])
         repopulate(population, size)
 
 
@@ -207,12 +205,9 @@ def all_solutions_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
         print(f"    Found {len(solutions_found)} solutions")
 
         selection(population, hcount, lcount)
-
-        for i in range(1, len(population)):
-            crossover(population[i], population[i - 1])
-
-        for individu in population:
-            mutate(individu)
-            individu.n_conflicts = individu.fitness()
-
+        crossover(population[random.randint(0, 7)], population[random.randint(0, 7)])
+        mutate(population[random.randint(0, 7)])
         repopulate(population, size)
+
+
+all_solutions_algorithm()
