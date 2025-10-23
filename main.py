@@ -12,9 +12,6 @@ class Individual:
     n_conflicts: Amount of conflicts for this configuration.
     """
 
-    positions: list[int] = []
-    n_conflicts: int = 0
-
     def __init__(self, positions: list[int] | None = None):
         self.positions = (
             positions if positions else random.sample(range(BOARD_SIZE), BOARD_SIZE)
@@ -35,10 +32,7 @@ class Individual:
         returns: True if queens conflict, False otherwise.
         """
         return (
-            p1[0] == p2[0]
-            or p1[1] == p2[1]
-            or max(p1[0], p2[0]) - min(p1[0], p2[0])
-            == max(p1[1], p2[1]) - min(p1[1], p2[1])
+            p1[0] == p2[0] or p1[1] == p2[1] or abs(p1[0] - p2[0]) == abs(p1[1] - p2[1])
         )
 
     def fitness(self) -> int:
@@ -150,9 +144,9 @@ def simple_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
     hcount (default=5): Number of best elements to keep from population.
     lcount (default=5): Number of worst elements to keep from population.
     """
-    population = create_random_pop(size)
-
     attempt = 0
+
+    population = create_random_pop(size)
 
     while True:
         attempt += 1
@@ -186,13 +180,12 @@ def all_solutions_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
     hcount (default=5): Number of best elements to keep from population.
     lcount (default=5): Number of worst elements to keep from population.
     """
-    population = create_random_pop(size)
-
     solutions_found: set[str] = set()
-
     attempt = 0
 
-    while len(solutions_found) != 92:
+    population = create_random_pop(size)
+
+    while len(solutions_found) < 92:
         attempt += 1
         print(f"Attempt #{attempt}")
         evaluate(population)
@@ -203,7 +196,13 @@ def all_solutions_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
 
         print(f"    Found {len(solutions_found)} solutions")
 
+        if len(solutions_found) == 92:
+            break
+
         selection(population, hcount, lcount)
         crossover(population[random.randint(0, 7)], population[random.randint(0, 7)])
         mutate(population[random.randint(0, 7)])
         repopulate(population, size)
+
+
+all_solutions_algorithm()
