@@ -203,6 +203,3 @@ def all_solutions_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
         crossover(population[random.randint(0, 7)], population[random.randint(0, 7)])
         mutate(population[random.randint(0, 7)])
         repopulate(population, size)
-
-
-all_solutions_algorithm()
