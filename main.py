@@ -97,10 +97,8 @@ def crossover(ind1: Individual, ind2: Individual):
     ind2: Second individual.
     """
     half = BOARD_SIZE // 2
-    ind1_slice = ind1.positions[:half]
-    ind2_slice = ind2.positions[-half:]
-    ind1.positions[:half] = ind2_slice
-    ind2.positions[-half:] = ind1_slice
+    for i in range(half):
+        ind1.positions[i], ind2.positions[i] = ind2.positions[i], ind1.positions[i]
     ind1.n_conflicts = ind1.fitness()
     ind2.n_conflicts = ind2.fitness()
 
@@ -126,80 +124,52 @@ def repopulate(population: list[Individual], size: int):
         population += [Individual() for _ in range(0, size - len(population))]
 
 
-def simple_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
+def find_one_solution(size: int = 20, hcount: int = 5, lcount: int = 5) -> Individual:
     """
-    Simple version of the algorithm.
-
-    1. Creates a random population of `subjects` individuals.
-    2. While no solution is found :
-        - Evaluates population (sort by `conflicts`)
-        - Exits if solution was found
-        - Selects `hcount` best and `lcount` worst individuals in `population`
-        - Creates a new generation of individuals (swaps positions)
-        - Mutates every individual in `population`
-        - Repopulates population to match the desired `size`
-
+    Finds a single solution for the 8 Queens problem.
 
     size (default=20): Size of the population.
     hcount (default=5): Number of best elements to keep from population.
     lcount (default=5): Number of worst elements to keep from population.
-    """
-    attempt = 0
 
+    returns: An Individual with 0 conflicts.
+    """
     population = create_random_pop(size)
 
     while True:
-        attempt += 1
-        print(f"Attempt #{attempt}")
         evaluate(population)
 
         if population[0].n_conflicts == 0:
-            print(population[0])
-            break
+            return population[0]
 
         selection(population, hcount, lcount)
-        crossover(population[random.randint(0, 7)], population[random.randint(0, 7)])
-        mutate(population[random.randint(0, 7)])
+        pop_size = len(population) - 1
+        crossover(
+            population[random.randint(0, pop_size)],
+            population[random.randint(0, pop_size)],
+        )
+        mutate(population[random.randint(0, pop_size)])
         repopulate(population, size)
 
 
-def all_solutions_algorithm(size: int = 20, hcount: int = 5, lcount: int = 5):
+def find_all_solutions(size: int = 20, hcount: int = 5, lcount: int = 5):
     """
     This version of the algorithm shows every solution for the 8 Queens problem.
 
-    1. Creates a random population of `size` individuals.
-    2. While `solutions_found` is less than 92 :
-        - Evaluates population (sort by `conflicts`)
-        - Adds all 0 conflict solutions to solutions_found set
-        - Selects `hcount` best and `lcount` worst individuals in `population`
-        - Creates a new generation of individuals (swaps positions)
-        - Mutates every individual in `population`
-        - Repopulates population to match the desired `size`
+    Finds solutions one at a time by restarting with a fresh population each time.
+    This is much faster than trying to evolve all 92 solutions simultaneously.
 
     size (default=20): Size of the population.
     hcount (default=5): Number of best elements to keep from population.
     lcount (default=5): Number of worst elements to keep from population.
     """
-    solutions_found: set[str] = set()
-    attempt = 0
-
-    population = create_random_pop(size)
+    solutions_found: list[Individual] = []
 
     while len(solutions_found) < 92:
-        attempt += 1
-        print(f"Attempt #{attempt}")
-        evaluate(population)
+        print(f"Found {len(solutions_found)} solutions")
 
-        for ind in population:
-            if ind.n_conflicts == 0:
-                solutions_found.add(str(ind.positions))
+        solution = find_one_solution(size, hcount, lcount)
+        if not any(s.positions == solution.positions for s in solutions_found):
+            solutions_found.append(solution)
 
-        print(f"    Found {len(solutions_found)} solutions")
-
-        if len(solutions_found) == 92:
-            break
-
-        selection(population, hcount, lcount)
-        crossover(population[random.randint(0, 7)], population[random.randint(0, 7)])
-        mutate(population[random.randint(0, 7)])
-        repopulate(population, size)
+    return solutions_found
